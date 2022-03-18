@@ -61,6 +61,28 @@ timer_init:
 	stz ms_counter
     stz ms_counter + 2
 
+    lda clock_khz
+    beq @detect_clock
+
+    set_all_8
+    sta VIAA + VIA_T1CL
+    swa 
+    sta VIAA + VIA_T1CH
+    lda #VIA_ACR_T1_CONTINUOUS_NO_OUTPUT
+    sta VIAA + VIA_ACR
+    lda #%11000000
+    sta VIAA + VIA_IER
+    set_all_16
+
+    cli
+
+    ply
+    plx
+    pla
+	rts
+
+@detect_clock:
+
     set_all_8
 
     lda RTC + DS1501_CONTROL_B
@@ -177,6 +199,9 @@ w65c22_init:
     lda #$ffff
     sta VIAA + VIA_DDRB
     sta VIAB + VIA_DDRB
+
+    lda #2000
+    sta clock_khz
 
     set_acc_8
 
